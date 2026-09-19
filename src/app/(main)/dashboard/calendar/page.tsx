@@ -1,5 +1,5 @@
-import { Calendar } from "./_components/calendar";
+import { redirect } from "next/navigation";
 
 export default function Page() {
-  return <Calendar />;
+  redirect("/dashboard/calendrier");
 }
