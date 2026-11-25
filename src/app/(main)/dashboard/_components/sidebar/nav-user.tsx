@@ -1,6 +1,7 @@
 "use client";
 
-import { CircleUser, CreditCard, EllipsisVertical, LogOut, MessageSquareDot } from "lucide-react";
+import Link from "next/link";
+import { CircleUser, CreditCard, EllipsisVertical, LogOut, School, Shield } from "lucide-react";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -14,6 +15,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar } from "@/components/ui/sidebar";
 import { getInitials } from "@/lib/utils";
+import { useAcademicStore } from "@/stores/academic/academic-store";
 
 export function NavUser({
   user,
@@ -25,6 +27,8 @@ export function NavUser({
   };
 }) {
   const { isMobile } = useSidebar();
+  const getActiveEtablissement = useAcademicStore((s) => s.getActiveEtablissement);
+  const activeEtab = getActiveEtablissement();
 
   return (
     <SidebarMenu>
@@ -33,11 +37,13 @@ export function NavUser({
           <DropdownMenuTrigger asChild>
             <SidebarMenuButton
               size="lg"
-              className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+              className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground border border-border/30"
             >
-              <Avatar className="h-8 w-8 rounded-lg grayscale">
+              <Avatar className="h-8 w-8 rounded-lg">
                 <AvatarImage src={user.avatar || undefined} alt={user.name} />
-                <AvatarFallback className="rounded-lg">{getInitials(user.name)}</AvatarFallback>
+                <AvatarFallback className="rounded-lg bg-primary/10 text-primary font-semibold">
+                  {getInitials(user.name)}
+                </AvatarFallback>
               </Avatar>
               <div className="grid flex-1 text-left text-sm leading-tight">
                 <span className="truncate font-medium">{user.name}</span>
@@ -66,23 +72,29 @@ export function NavUser({
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem>
-                <CircleUser />
-                Account
+              <DropdownMenuItem asChild>
+                <Link href="/dashboard/profil" className="flex items-center gap-2 cursor-pointer">
+                  <CircleUser className="size-4" />
+                  <span>Mon Profil Apprenant</span>
+                </Link>
               </DropdownMenuItem>
-              <DropdownMenuItem>
-                <CreditCard />
-                Billing
+              <DropdownMenuItem asChild>
+                <Link href="/dashboard/etablissement" className="flex items-center gap-2 cursor-pointer">
+                  <School className="size-4" />
+                  <span>Profil Établissement ({activeEtab.shortName})</span>
+                </Link>
               </DropdownMenuItem>
-              <DropdownMenuItem>
-                <MessageSquareDot />
-                Notifications
+              <DropdownMenuItem asChild>
+                <Link href="/dashboard/facturation" className="flex items-center gap-2 cursor-pointer">
+                  <CreditCard className="size-4" />
+                  <span>Mes Règlements & Facturation</span>
+                </Link>
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>
-              <LogOut />
-              Log out
+            <DropdownMenuItem className="text-destructive focus:text-destructive cursor-pointer">
+              <LogOut className="size-4 mr-2" />
+              <span>Se déconnecter</span>
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

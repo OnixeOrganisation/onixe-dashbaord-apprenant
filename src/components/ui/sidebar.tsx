@@ -161,7 +161,7 @@ function Sidebar({
   variant?: "sidebar" | "floating" | "inset"
   collapsible?: "offcanvas" | "icon" | "none"
 }) {
-  const { isMobile, state, openMobile, setOpenMobile } = useSidebar()
+  const { isMobile, state, open, setOpen, openMobile, setOpenMobile } = useSidebar()
 
   if (collapsible === "none") {
     return (
@@ -204,6 +204,20 @@ function Sidebar({
     )
   }
 
+  const handleMouseEnter = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!open) {
+      setOpen(true)
+    }
+    props.onMouseEnter?.(e)
+  }
+
+  const handleClickCapture = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!open) {
+      setOpen(true)
+    }
+    props.onClickCapture?.(e)
+  }
+
   return (
     <div
       className="group peer hidden text-sidebar-foreground md:block"
@@ -212,6 +226,8 @@ function Sidebar({
       data-variant={variant}
       data-side={side}
       data-slot="sidebar"
+      onMouseEnter={handleMouseEnter}
+      onClickCapture={handleClickCapture}
     >
       {/* This is what handles the sidebar gap on desktop */}
       <div
@@ -236,6 +252,8 @@ function Sidebar({
             : "group-data-[collapsible=icon]:w-(--sidebar-width-icon) group-data-[side=left]:border-r group-data-[side=right]:border-l",
           className
         )}
+        onMouseEnter={handleMouseEnter}
+        onClickCapture={handleClickCapture}
         {...props}
       >
         <div

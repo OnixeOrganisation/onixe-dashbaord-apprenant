@@ -15,7 +15,7 @@ export function TableauNotes() {
       <CardHeader className="pb-3">
         <div className="flex items-center gap-2">
           <FileSpreadsheet className="h-5 w-5 text-primary" />
-          <CardTitle className="font-semibold text-lg tracking-tight">Évaluations & Feedback Qualitatif</CardTitle>
+          <CardTitle className="font-semibold text-lg tracking-tight">Évaluations</CardTitle>
         </div>
         <CardDescription className="text-muted-foreground text-xs">
           Historique détaillé des évaluations par module et remarques pédagogiques des formateurs.

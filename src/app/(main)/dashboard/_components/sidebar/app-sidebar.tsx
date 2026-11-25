@@ -1,8 +1,5 @@
 "use client";
 
-import Link from "next/link";
-
-import { Command } from "lucide-react";
 import { useShallow } from "zustand/react/shallow";
 
 import {
@@ -10,18 +7,15 @@ import {
   SidebarContent,
   SidebarFooter,
   SidebarHeader,
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
+  useSidebar,
 } from "@/components/ui/sidebar";
-import { APP_CONFIG } from "@/config/app-config";
 import { rootUser } from "@/data/users";
 import { sidebarItems } from "@/navigation/sidebar/sidebar-items";
 import { usePreferencesStore } from "@/stores/preferences/preferences-provider";
 
 import { NavMain } from "./nav-main";
 import { NavUser } from "./nav-user";
-import { SupportCard } from "./support-card";
+import { SchoolSwitcher } from "./school-switcher";
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { sidebarVariant, sidebarCollapsible, isSynced } = usePreferencesStore(
@@ -32,28 +26,40 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     })),
   );
 
+  const { open, setOpen } = useSidebar();
+
   const variant = isSynced ? sidebarVariant : props.variant;
   const collapsible = isSynced ? sidebarCollapsible : props.collapsible;
 
+  const handleMouseEnter = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!open) {
+      setOpen(true);
+    }
+    props.onMouseEnter?.(e);
+  };
+
+  const handleClickCapture = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!open) {
+      setOpen(true);
+    }
+    props.onClickCapture?.(e);
+  };
+
   return (
-    <Sidebar {...props} variant={variant} collapsible={collapsible}>
-      <SidebarHeader>
-        <SidebarMenu>
-          <SidebarMenuItem>
-            <SidebarMenuButton asChild>
-              <Link prefetch={false} href="/dashboard/default">
-                <Command />
-                <span className="font-semibold text-base">{APP_CONFIG.name}</span>
-              </Link>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-        </SidebarMenu>
+    <Sidebar
+      {...props}
+      variant={variant}
+      collapsible={collapsible}
+      onMouseEnter={handleMouseEnter}
+      onClickCapture={handleClickCapture}
+    >
+      <SidebarHeader className="border-b border-sidebar-border/50 p-0">
+        <SchoolSwitcher />
       </SidebarHeader>
       <SidebarContent>
         <NavMain items={sidebarItems} />
       </SidebarContent>
-      <SidebarFooter>
-        <SupportCard />
+      <SidebarFooter className="border-t border-sidebar-border/50">
         <NavUser user={rootUser} />
       </SidebarFooter>
     </Sidebar>
