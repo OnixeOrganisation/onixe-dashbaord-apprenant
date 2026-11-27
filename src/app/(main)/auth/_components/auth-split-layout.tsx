@@ -12,6 +12,8 @@ interface AuthSplitLayoutProps {
 
 export function AuthSplitLayout({ children, imageSrc, imageAlt, headline, description }: AuthSplitLayoutProps) {
   const [isVisible, setIsVisible] = React.useState(false);
+  const [headlineCount, setHeadlineCount] = React.useState(0);
+  const [descriptionCount, setDescriptionCount] = React.useState(0);
 
   React.useEffect(() => {
     const frame = requestAnimationFrame(() => {
@@ -19,6 +21,50 @@ export function AuthSplitLayout({ children, imageSrc, imageAlt, headline, descri
     });
     return () => cancelAnimationFrame(frame);
   }, []);
+
+  React.useEffect(() => {
+    if (typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      setHeadlineCount(headline.length);
+      setDescriptionCount(description.length);
+      return;
+    }
+
+    setHeadlineCount(0);
+    setDescriptionCount(0);
+
+    let rafId = 0;
+    const startDelayMs = 250;
+    const headlineCharMs = 24;
+    const pauseBetweenMs = 150;
+    const descriptionCharMs = 14;
+    const startTime = performance.now();
+
+    const tick = (now: number) => {
+      const elapsed = now - startTime - startDelayMs;
+      if (elapsed > 0) {
+        const nextHeadlineCount = Math.min(headline.length, Math.floor(elapsed / headlineCharMs));
+        setHeadlineCount(nextHeadlineCount);
+
+        const headlineDuration = headline.length * headlineCharMs;
+        const descElapsed = elapsed - headlineDuration - pauseBetweenMs;
+        if (descElapsed > 0) {
+          const nextDescCount = Math.min(description.length, Math.floor(descElapsed / descriptionCharMs));
+          setDescriptionCount(nextDescCount);
+
+          if (nextHeadlineCount >= headline.length && nextDescCount >= description.length) {
+            return;
+          }
+        }
+      }
+      rafId = requestAnimationFrame(tick);
+    };
+
+    rafId = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(rafId);
+  }, [headline, description]);
+
+  const isTypingHeadline = headlineCount < headline.length;
+  const isTypingDescription = !isTypingHeadline && descriptionCount < description.length;
 
   return (
     <main>
@@ -45,20 +91,29 @@ export function AuthSplitLayout({ children, imageSrc, imageAlt, headline, descri
           </div>
 
           <div className="absolute right-10 bottom-10 left-10 space-y-2 text-white">
-            <h2
-              className={`font-semibold text-2xl leading-snug transition-all delay-150 duration-700 ease-out motion-reduce:translate-y-0 motion-reduce:opacity-100 motion-reduce:transition-none ${
-                isVisible ? "translate-y-0 opacity-100" : "translate-y-4 opacity-0"
-              }`}
-            >
-              {headline}
-            </h2>
-            <p
-              className={`text-sm text-white/80 transition-all delay-300 duration-700 ease-out motion-reduce:translate-y-0 motion-reduce:opacity-100 motion-reduce:transition-none ${
-                isVisible ? "translate-y-0 opacity-100" : "translate-y-4 opacity-0"
-              }`}
-            >
-              {description}
-            </p>
+            <div className="relative">
+              <div className="invisible font-semibold text-2xl leading-snug" aria-hidden="true">
+                {headline}
+              </div>
+              <h2 className="absolute inset-0 font-semibold text-2xl leading-snug">
+                {headline.slice(0, headlineCount)}
+                {isTypingHeadline && (
+                  <span className="ml-0.5 inline-block h-[0.95em] w-0.5 animate-pulse bg-white/90 align-middle" />
+                )}
+              </h2>
+            </div>
+
+            <div className="relative">
+              <p className="invisible text-sm text-white/80" aria-hidden="true">
+                {description}
+              </p>
+              <p className="absolute inset-0 text-sm text-white/80">
+                {description.slice(0, descriptionCount)}
+                {isTypingDescription && (
+                  <span className="ml-0.5 inline-block h-[0.95em] w-0.5 animate-pulse bg-white/80 align-middle" />
+                )}
+              </p>
+            </div>
           </div>
         </div>
         <div className="relative order-1 flex h-full">{children}</div>

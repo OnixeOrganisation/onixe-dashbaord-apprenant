@@ -1,5 +1,7 @@
 "use client";
 
+import { useRouter } from "next/navigation";
+
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -11,26 +13,17 @@ import { Input } from "@/components/ui/input";
 
 const formSchema = z
   .object({
-    email: z.email({ message: "Please enter a valid email address." }),
-    password: z.string().min(6, { message: "Password must be at least 6 characters." }),
-    confirmPassword: z.string().min(6, { message: "Confirm Password must be at least 6 characters." }),
+    email: z.email({ message: "Veuillez saisir une adresse e-mail valide." }),
+    password: z.string().min(6, { message: "Le mot de passe doit contenir au moins 6 caractères." }),
+    confirmPassword: z.string().min(6, { message: "La confirmation doit contenir au moins 6 caractères." }),
   })
   .refine((data) => data.password === data.confirmPassword, {
-    message: "Passwords do not match.",
+    message: "Les mots de passe ne correspondent pas.",
     path: ["confirmPassword"],
   });
 
-function onSubmit(data: z.infer<typeof formSchema>) {
-  toast("You submitted the following values", {
-    description: (
-      <pre className="mt-2 w-[320px] rounded-md bg-neutral-950 p-4">
-        <code className="text-white">{JSON.stringify(data, null, 2)}</code>
-      </pre>
-    ),
-  });
-}
-
 export function RegisterForm() {
+  const router = useRouter();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -40,6 +33,11 @@ export function RegisterForm() {
     },
   });
 
+  function onSubmit(_data: z.infer<typeof formSchema>) {
+    toast.success("Compte créé avec succès");
+    router.push("/dashboard/accueil");
+  }
+
   return (
     <form noValidate onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-4">
       <FieldGroup className="gap-4">
@@ -48,12 +46,12 @@ export function RegisterForm() {
           name="email"
           render={({ field, fieldState }) => (
             <Field className="gap-1.5" data-invalid={fieldState.invalid}>
-              <FieldLabel htmlFor="register-email">Email Address</FieldLabel>
+              <FieldLabel htmlFor="register-email">Adresse e-mail</FieldLabel>
               <Input
                 {...field}
                 id="register-email"
                 type="email"
-                placeholder="you@example.com"
+                placeholder="apprenant@onixe.org"
                 autoComplete="email"
                 aria-invalid={fieldState.invalid}
               />
@@ -66,7 +64,7 @@ export function RegisterForm() {
           name="password"
           render={({ field, fieldState }) => (
             <Field className="gap-1.5" data-invalid={fieldState.invalid}>
-              <FieldLabel htmlFor="register-password">Password</FieldLabel>
+              <FieldLabel htmlFor="register-password">Mot de passe</FieldLabel>
               <Input
                 {...field}
                 id="register-password"
@@ -84,7 +82,7 @@ export function RegisterForm() {
           name="confirmPassword"
           render={({ field, fieldState }) => (
             <Field className="gap-1.5" data-invalid={fieldState.invalid}>
-              <FieldLabel htmlFor="register-confirm-password">Confirm Password</FieldLabel>
+              <FieldLabel htmlFor="register-confirm-password">Confirmer le mot de passe</FieldLabel>
               <Input
                 {...field}
                 id="register-confirm-password"
@@ -99,7 +97,7 @@ export function RegisterForm() {
         />
       </FieldGroup>
       <Button className="w-full" type="submit">
-        Register
+        Créer mon compte
       </Button>
     </form>
   );
